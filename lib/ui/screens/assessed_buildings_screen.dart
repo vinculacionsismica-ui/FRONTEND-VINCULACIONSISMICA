@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart'; // 👈 importar AppColors
 import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_admin_screen.dart';
+import 'building_pdf_service.dart'; // Cambia la ruta por la correcta
 class AssessedBuildingsPage extends StatefulWidget {
   const AssessedBuildingsPage({super.key});
 
@@ -38,14 +39,16 @@ class _AssessedBuildingsPageState extends State<AssessedBuildingsPage> {
 
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
+
     setState(() {
-      _filteredEdificios = _edificios
-          .where(
-            (edificio) => (edificio['nombre_edificio'] ?? "")
-                .toLowerCase()
-                .contains(query),
-          )
-          .toList();
+      if (query.isEmpty) {
+        _filteredEdificios = List.from(_edificios);
+      } else {
+        _filteredEdificios = _edificios.where((edificio) {
+          final nombre = (edificio['nombre_edificio'] ?? "").toLowerCase();
+          return nombre.contains(query);
+        }).toList();
+      }
     });
   }
 
@@ -146,10 +149,10 @@ class _AssessedBuildingsPageState extends State<AssessedBuildingsPage> {
                     );
                   }
 
-                  _edificios = snapshot.data!;
-                  _filteredEdificios = _filteredEdificios.isEmpty
-                      ? _edificios
-                      : _filteredEdificios;
+                  if (_edificios.isEmpty) {
+                    _edificios = snapshot.data!;
+                    _filteredEdificios = List.from(_edificios);
+                  }
 
                   return Column(
                     children: [
@@ -197,59 +200,71 @@ class _AssessedBuildingsPageState extends State<AssessedBuildingsPage> {
                                 childAspectRatio: 0.75,
                               ),
                           itemCount: _filteredEdificios.length,
-                          itemBuilder: (context, index) {
+                          itemBuilder: (context, index) { // 👈 Asegúrate de incluir (context, index) aquí
                             final edificio = _filteredEdificios[index];
 
-                            return SizedBox(
-                              height: 250,
-                              width: 180,
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (edificio['foto_edificio_url'] != null)
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Image.network(
-                                            edificio['foto_edificio_url'],
-                                            height: 100,
-                                            width: 100,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                            // Extraemos el ID asegurándonos de que sea un int
+                            final int idEdificio = edificio['id_edificio'] ?? 0;
 
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        edificio['nombre_edificio'] ??
-                                            "Sin nombre",
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.text,
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Imagen del edificio
+                                    if (edificio['foto_edificio_url'] != null)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          edificio['foto_edificio_url'],
+                                          height: 80,
+                                          width: 100,
+                                          fit: BoxFit.cover,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        edificio['direccion'] ??
-                                            "Sin dirección",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: AppColors.gray500,
+
+                                    const SizedBox(height: 8),
+
+                                    // Nombre del edificio
+                                    Text(
+                                      edificio['nombre_edificio'] ?? "Sin nombre",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.text,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
+
+                                    const SizedBox(height: 8),
+
+                                    // BOTÓN PDF
+                                    ElevatedButton.icon(
+                                      onPressed: () async {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text("Generando reporte PDF...")),
+                                        );
+                                        // Llamada al servicio
+                                        await BuildingPdfService.generateFullReport(idEdificio);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red.shade700,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
                                       ),
-                                    ],
-                                  ),
+                                      icon: const Icon(Icons.picture_as_pdf, size: 18),
+                                      label: const Text("PDF", style: TextStyle(fontSize: 12)),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
