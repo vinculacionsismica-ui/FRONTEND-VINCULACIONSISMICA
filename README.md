@@ -48,7 +48,7 @@ El proyecto sigue una arquitectura limpia (Clean Architecture) con separación d
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone [https://github.com/evaluacionsismica2002-ui/PROYECTO-EVALUACION-SISIMICA-FRONTEND.git](https://github.com/evaluacionsismica2002-ui/PROYECTO-EVALUACION-SISIMICA-FRONTEND.git)
+    git clone "**"
     cd flutter_application_1
     ```
 
