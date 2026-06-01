@@ -21,8 +21,8 @@ import '../../ui/screens/user_list_screen.dart';
 void main() async {
   await Supabase.initialize(
     anonKey:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkdWdweW1hc2pydmhidWFrb2VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTIyMDksImV4cCI6MjA4NjkyODIwOX0.aV-wVvULJBhyaaTzqmqjRlRRhcVeo15A8EWQTzR6-0g",
-    url: "https://xdugpymasjrvhbuakoec.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzamJlanhycXVtcXBxZnB2cG1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNjU5OTQsImV4cCI6MjA5NTg0MTk5NH0.j97oHACM1K6bM0QL_5fTEyNOX4CzgZqhyHglLxk9ekE",
+    url: "https://gsjbejxrqumqpqfpvpmp.supabase.co",
   );
   runApp(const MyApp());
 }
